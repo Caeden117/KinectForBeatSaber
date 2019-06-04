@@ -32,7 +32,7 @@ namespace KinectForBeatSaber
         public void OnApplicationStart()
         {
             Instance = this;
-            Log("Kinect for Custom Avatars is loading!");
+            Log("Kinect for Beat Saber is loading!");
             foreach (string arg in Environment.GetCommandLineArgs())
             {
                 if (arg.StartsWith("KinectClientHandle"))
@@ -118,7 +118,7 @@ namespace KinectForBeatSaber
         public void OnFixedUpdate() { }
         public static void Log(string message)
         {
-            Console.WriteLine($"[Kinect for Custom Avatars] {message}");
+            Console.WriteLine($"[Kinect for Beat Saber] {message}");
         }
     }
 }

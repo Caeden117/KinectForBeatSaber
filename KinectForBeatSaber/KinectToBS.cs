@@ -12,9 +12,6 @@ namespace KinectForBeatSaber
     {
         private Dictionary<JointType, GameObject> trackingPoints = new Dictionary<JointType, GameObject>();
 
-        private Color inferredColor = Color.yellow;
-        private Color notTrackedColor = Color.red;
-
         private void Awake()
         {
             Plugin.Log("Kinect To Beat Saber GameObject created!");
@@ -36,7 +33,7 @@ namespace KinectForBeatSaber
             {
                 foreach (GameObject obj in trackingPoints.Values) Destroy(obj);
                 trackingPoints.Clear();
-                Plugin.Log("Connection with the Kinect for Avatars console application failed - Destroying skeleton.");
+                Plugin.Log("Connection with the Kinect for Beat Saber console application failed - Destroying skeleton.");
                 Destroy(gameObject);
             }
         }
@@ -59,18 +56,6 @@ namespace KinectForBeatSaber
                 trackingPoints.Add(joint.JointType, primitive);
             }
             trackingPoints[joint.JointType].transform.localPosition = SkeletonPointToVector3(joint.Position);
-            Color trackingColor = Color.white;
-            switch (joint.TrackingState)
-            {
-                case JointTrackingState.Inferred:
-                    trackingColor = inferredColor;
-                    break;
-                case JointTrackingState.NotTracked:
-                    trackingColor = notTrackedColor;
-                    break;
-                default: break;
-            }
-            trackingPoints[joint.JointType].GetComponent<Renderer>().material.color = trackingColor;
         }
 
         private Vector3 SkeletonPointToVector3 (SkeletonPoint point)

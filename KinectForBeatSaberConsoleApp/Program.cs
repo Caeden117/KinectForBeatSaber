@@ -37,7 +37,7 @@ namespace KinectForBeatSaberApp
             serverStream.ReadMode = PipeTransmissionMode.Byte;
 
             Process beatSaber = new Process();
-            beatSaber.StartInfo.FileName = "Beat Saber.exe"; //KinectForAvatars NEEDS to be placed in the root Beat Saber folder
+            beatSaber.StartInfo.FileName = "Beat Saber.exe"; //This NEEDS to be placed in the root Beat Saber folder
             beatSaber.StartInfo.Arguments = $"{string.Join(" ", args)} KinectClientHandle={serverStream.GetClientHandleAsString()}";
             beatSaber.StartInfo.UseShellExecute = false;
             beatSaber.Start();
