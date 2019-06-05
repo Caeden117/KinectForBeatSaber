@@ -10,7 +10,7 @@ namespace KinectForBeatSaber
 {
     class KinectToBS : MonoBehaviour
     {
-        private Dictionary<JointType, GameObject> trackingPoints = new Dictionary<JointType, GameObject>();
+        public Dictionary<JointType, GameObject> trackingPoints = new Dictionary<JointType, GameObject>();
 
         private void Awake()
         {

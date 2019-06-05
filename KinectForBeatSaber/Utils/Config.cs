@@ -31,7 +31,7 @@ namespace KinectForBeatSaber.Utils
         internal static object DeserializeFromConfig(object input)
         {
             Type type = input.GetType();
-            MemberInfo[] infos = type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            MemberInfo[] infos = type.GetMembers(BindingFlags.Public | BindingFlags.Instance);
             foreach (MemberInfo info in infos)
             {
                 if (info.MemberType == MemberTypes.Field)
@@ -51,12 +51,14 @@ namespace KinectForBeatSaber.Utils
         private static Vector3 ParseToVector3(string s)
         {
             string[] args = s.Split('|');
-            return new Vector3(float.Parse(args[0]), float.Parse(args[1]), float.Parse(args[2]));
+            return new Vector3((float)Math.Round(float.Parse(args[0]), 1),
+                (float)Math.Round(float.Parse(args[1]), 1),
+                (float)Math.Round(float.Parse(args[2]), 1));
         }
 
         private static string ParseFromVector3(Vector3 v)
         {
-            return $"{v.x}|{v.y}|{v.z}";
+            return $"{Math.Round(v.x, 1)}|{Math.Round(v.y, 1)}|{Math.Round(v.z, 1)}";
         }
 
         public void Save()

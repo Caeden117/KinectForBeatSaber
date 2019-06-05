@@ -63,13 +63,14 @@ namespace KinectForBeatSaberApp
             beatSaber.Close();
             Console.WriteLine("Beat Saber terminated. Terminating self...");
             Process.GetCurrentProcess().Close();
-            Console.ReadLine();
         }
 
         private static void Exit(object sender, EventArgs e)
         {
+            sw.WriteLine("TERMINATED");
             serverStream.Dispose();
             chooser.KinectChanged -= KinectUpdate;
+            chooser.Stop();
             if (sensor != null)
             {
                 sensor.SkeletonFrameReady -= SkeletonFrameReady;
@@ -84,6 +85,7 @@ namespace KinectForBeatSaberApp
             {
                 sensor.SkeletonStream.Disable();
                 sensor.SkeletonFrameReady -= SkeletonFrameReady;
+                sensor.Stop();
             }
             sensor = e.NewSensor;
             if (sensor != null)
@@ -96,20 +98,24 @@ namespace KinectForBeatSaberApp
 
         private static void SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            Skeleton[] array = new Skeleton[0];
-            using (SkeletonFrame frame = e.OpenSkeletonFrame())
+            try
             {
-                if (frame == null) return;
-                array = new Skeleton[frame.SkeletonArrayLength];
-                frame.CopySkeletonDataTo(array);
-                byte[] bytes = ObjectToByteArray(array);
-                try
+                Skeleton[] array = new Skeleton[0];
+                using (SkeletonFrame frame = e.OpenSkeletonFrame())
                 {
-                    sw.AutoFlush = true;
-                    sw.WriteLine(string.Join(",", bytes));
+                    if (frame == null) return;
+                    array = new Skeleton[frame.SkeletonArrayLength];
+                    frame.CopySkeletonDataTo(array);
+                    byte[] bytes = ObjectToByteArray(array);
+                    try
+                    {
+                        sw.AutoFlush = true;
+                        sw.WriteLine(string.Join(",", bytes));
+                    }
+                    catch { Console.WriteLine("Beat Saber terminated."); }
                 }
-                catch { Console.WriteLine("Beat Saber terminated."); }
             }
+            catch { }
         }
 
         public static byte[] ObjectToByteArray(Object obj)

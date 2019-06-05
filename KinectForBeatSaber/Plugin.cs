@@ -63,6 +63,9 @@ namespace KinectForBeatSaber
             }
             parent = new GameObject("Kinect for Beat Saber");
             parent.AddComponent<KinectToBS>();
+            parent.transform.position = config.PositionOffset;
+            parent.transform.rotation = Quaternion.Euler(config.RotationOffset);
+            parent.transform.localScale = Vector3.one * config.Scale;
             Process.GetCurrentProcess().Exited += Exit;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
@@ -78,6 +81,11 @@ namespace KinectForBeatSaber
                     string temp;
                     while ((temp = sr.ReadLine()) != null)
                     {
+                        if (temp == "TERMINATED")
+                        {
+                            Log("Connection died.");
+                            CompanionConnected = false;
+                        }
                         List<byte> bytes = new List<byte>();
                         foreach(string part in temp.Split(',')) bytes.Add(Convert.ToByte(part));
                         MemoryStream memStrem = new MemoryStream();
@@ -111,6 +119,7 @@ namespace KinectForBeatSaber
 
         private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
+            if (arg0.name == "MenuCore") SettingsUI.Create();
         }
 
         public void OnApplicationQuit()
