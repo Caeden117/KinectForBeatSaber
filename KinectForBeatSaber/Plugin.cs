@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Microsoft.Kinect;
 using System.Threading;
 using UnityEngine;
+using KinectForBeatSaber.Utils;
 
 namespace KinectForBeatSaber
 {
@@ -20,9 +21,12 @@ namespace KinectForBeatSaber
     {
         public string Name => "Kinect for Beat Saber (Xbox 360)";
         public string Version => "0.0.1";
-        public static Plugin Instance;
 
+        public static Plugin Instance;
         public static bool CompanionConnected = false;
+        public static Config config;
+        public static GameObject parent;
+
         private AnonymousPipeClientStream client;
         internal static ConcurrentQueue<Skeleton[]> skeletonsToProcess = new ConcurrentQueue<Skeleton[]>();
         private Thread thread;
@@ -33,6 +37,7 @@ namespace KinectForBeatSaber
         {
             Instance = this;
             Log("Kinect for Beat Saber is loading!");
+            config = Config.Load();
             foreach (string arg in Environment.GetCommandLineArgs())
             {
                 if (arg.StartsWith("KinectClientHandle"))
@@ -56,7 +61,8 @@ namespace KinectForBeatSaber
                     }
                 }
             }
-            new GameObject("Kinect to Avatars").AddComponent<KinectToBS>();
+            parent = new GameObject("Kinect for Beat Saber");
+            parent.AddComponent<KinectToBS>();
             Process.GetCurrentProcess().Exited += Exit;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;

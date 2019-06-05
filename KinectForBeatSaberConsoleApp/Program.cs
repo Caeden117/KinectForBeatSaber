@@ -63,6 +63,7 @@ namespace KinectForBeatSaberApp
             beatSaber.Close();
             Console.WriteLine("Beat Saber terminated. Terminating self...");
             Process.GetCurrentProcess().Close();
+            Console.ReadLine();
         }
 
         private static void Exit(object sender, EventArgs e)

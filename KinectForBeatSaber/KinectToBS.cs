@@ -56,6 +56,18 @@ namespace KinectForBeatSaber
                 trackingPoints.Add(joint.JointType, primitive);
             }
             trackingPoints[joint.JointType].transform.localPosition = SkeletonPointToVector3(joint.Position);
+            Color trackingColor = Color.white;
+            switch (joint.TrackingState)
+            {
+                case JointTrackingState.Inferred:
+                    trackingColor = Color.yellow;
+                    break;
+                case JointTrackingState.NotTracked:
+                    trackingColor = Color.red;
+                    break;
+                default: break;
+            }
+            trackingPoints[joint.JointType].GetComponent<Renderer>().material.color = trackingColor;
         }
 
         private Vector3 SkeletonPointToVector3 (SkeletonPoint point)
