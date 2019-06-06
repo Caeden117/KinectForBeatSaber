@@ -12,6 +12,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using Microsoft.Kinect;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using KinectForBeatSaber.Utils;
 
@@ -28,10 +29,8 @@ namespace KinectForBeatSaber
         public static GameObject parent;
 
         private AnonymousPipeClientStream client;
-        internal static ConcurrentQueue<Skeleton[]> skeletonsToProcess = new ConcurrentQueue<Skeleton[]>();
-        private Thread thread;
-
-        internal static Material trackingPointMaterial;
+        internal static List<Skeleton[]> skeletonsToProcess = new List<Skeleton[]>();
+        private Task processingTask;
 
         public void OnApplicationStart()
         {
@@ -56,8 +55,8 @@ namespace KinectForBeatSaber
                         }
                         while (!temp.StartsWith("SYNC"));
                         Log("Connections synced! We're ready for a good time!");
-                        thread = new Thread(new ThreadStart(HandleSkeletonData));
-                        thread.Start();
+                        processingTask = new Task(HandleSkeletonData);
+                        processingTask.Start();
                     }
                 }
             }
@@ -93,7 +92,7 @@ namespace KinectForBeatSaber
                         memStrem.Write(bytes.ToArray(), 0, bytes.Count);
                         memStrem.Seek(0, SeekOrigin.Begin);
                         Skeleton[] skeletons = (Skeleton[])binForm.Deserialize(memStrem);
-                        skeletonsToProcess.Enqueue(skeletons);
+                        skeletonsToProcess.Add(skeletons);
                     }
                 }
             }
@@ -106,15 +105,14 @@ namespace KinectForBeatSaber
         private void Exit(object sender, EventArgs e)
         {
             client.Close();
-            thread.Abort();
+            processingTask.Dispose();
         }
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene arg1)
         {
-            foreach (Material mat in Resources.FindObjectsOfTypeAll<Material>())
-            {
-                if (mat.name == "GlassHandle") trackingPointMaterial = mat;
-            }
+            Skeleton[] last = skeletonsToProcess.Last();
+            skeletonsToProcess.Clear();
+            skeletonsToProcess.Add(last);
         }
 
         private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)

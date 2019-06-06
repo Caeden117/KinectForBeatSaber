@@ -20,13 +20,13 @@ namespace KinectForBeatSaber
 
         private void Update()
         {
-            if (!Plugin.skeletonsToProcess.IsEmpty)
+            if (Plugin.skeletonsToProcess.Count > 0)
             {
-                if (Plugin.skeletonsToProcess.TryDequeue(out Skeleton[] skeletons))
-                {
-                    foreach (Skeleton skeleton in skeletons)
-                        if (skeleton.TrackingState == SkeletonTrackingState.Tracked) RefreshTrackingPoints(skeleton);
-                }
+                Skeleton[] skeletons = Plugin.skeletonsToProcess.First();
+                foreach (Skeleton skeleton in skeletons)
+                    if (skeleton.TrackingState == SkeletonTrackingState.Tracked) RefreshTrackingPoints(skeleton);
+                if (Plugin.skeletonsToProcess.Last() != skeletons)
+                    Plugin.skeletonsToProcess.Remove(skeletons);
             }
 
             if (!Plugin.CompanionConnected)
@@ -50,7 +50,6 @@ namespace KinectForBeatSaber
             if (!trackingPoints.ContainsKey(joint.JointType))
             {
                 GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                primitive.GetComponent<Renderer>().material = Plugin.trackingPointMaterial;
                 primitive.transform.localScale = Vector3.one * 0.1f;
                 primitive.transform.parent = transform;
                 trackingPoints.Add(joint.JointType, primitive);

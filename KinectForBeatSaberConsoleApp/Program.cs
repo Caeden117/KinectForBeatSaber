@@ -68,6 +68,7 @@ namespace KinectForBeatSaberApp
         private static void Exit(object sender, EventArgs e)
         {
             sw.WriteLine("TERMINATED");
+            sw.Close();
             serverStream.Dispose();
             chooser.KinectChanged -= KinectUpdate;
             chooser.Stop();
