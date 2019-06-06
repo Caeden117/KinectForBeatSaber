@@ -1,4 +1,5 @@
-﻿using IllusionPlugin;
+﻿using IPA.Old;
+using IPA.Loader;
 using UnityEngine.SceneManagement;
 using System;
 using System.IO.Pipes;
@@ -18,6 +19,7 @@ using KinectForBeatSaber.Utils;
 
 namespace KinectForBeatSaber
 {
+    #pragma warning disable CS0618 //Fuck off DaNike
     public class Plugin : IPlugin
     {
         public string Name => "Kinect for Beat Saber (Xbox 360)";
@@ -62,6 +64,11 @@ namespace KinectForBeatSaber
             }
             parent = new GameObject("Kinect for Beat Saber");
             parent.AddComponent<KinectToBS>();
+            if (PluginManager.GetPlugin("Custom Avatars") != null)
+            {
+                Log("Custom Avatars detected! Adding Custom Avatars hook...");
+                //parent.AddComponent<AvatarsToKinect>();
+            }
             parent.transform.position = config.PositionOffset;
             parent.transform.rotation = Quaternion.Euler(config.RotationOffset);
             parent.transform.localScale = Vector3.one * config.Scale;
@@ -110,13 +117,14 @@ namespace KinectForBeatSaber
 
         private void SceneManagerOnActiveSceneChanged(Scene arg0, Scene arg1)
         {
-            Skeleton[] last = skeletonsToProcess.Last();
-            skeletonsToProcess.Clear();
-            skeletonsToProcess.Add(last);
+
         }
 
         private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
+            Skeleton[] last = skeletonsToProcess.Last();
+            skeletonsToProcess.Clear();
+            skeletonsToProcess.Add(last);
             if (arg0.name == "MenuCore") SettingsUI.Create();
         }
 

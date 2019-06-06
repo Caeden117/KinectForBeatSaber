@@ -81,7 +81,6 @@ namespace KinectForBeatSaberApp
 
         private static void KinectUpdate(object sender, KinectChangedEventArgs e)
         {
-            Console.WriteLine($"Kinect updated! {e.NewSensor.Status}");
             if (sensor != null)
             {
                 sensor.SkeletonStream.Disable();
@@ -91,6 +90,7 @@ namespace KinectForBeatSaberApp
             sensor = e.NewSensor;
             if (sensor != null)
             {
+                Console.WriteLine($"Kinect updated! {e.NewSensor.Status}");
                 sensor.SkeletonStream.Enable();
                 sensor.SkeletonFrameReady += SkeletonFrameReady;
                 sensor.Start();

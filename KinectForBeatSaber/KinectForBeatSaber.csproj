@@ -125,6 +125,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AvatarsToKinect.cs" />
     <Compile Include="Utils\Config.cs" />
     <Compile Include="KinectToBS.cs" />
     <Compile Include="Plugin.cs" />
