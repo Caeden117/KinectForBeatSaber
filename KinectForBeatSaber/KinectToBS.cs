@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace KinectForBeatSaber
 {
-    class KinectToBS : MonoBehaviour
+    public class KinectToBS : MonoBehaviour
     {
-        public Dictionary<JointType, GameObject> trackingPoints = new Dictionary<JointType, GameObject>();
+        public Dictionary<JointType, Transform> trackingPoints = new Dictionary<JointType, Transform>();
 
         private void Awake()
         {
@@ -31,7 +31,7 @@ namespace KinectForBeatSaber
 
             if (!Plugin.CompanionConnected)
             {
-                foreach (GameObject obj in trackingPoints.Values) Destroy(obj);
+                foreach (Transform obj in trackingPoints.Values) Destroy(obj.gameObject);
                 trackingPoints.Clear();
                 Plugin.Log("Connection with the Kinect for Beat Saber console application failed - Destroying skeleton.");
                 Destroy(gameObject);
@@ -52,9 +52,10 @@ namespace KinectForBeatSaber
                 GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 primitive.transform.localScale = Vector3.one * 0.1f;
                 primitive.transform.parent = transform;
-                trackingPoints.Add(joint.JointType, primitive);
+                trackingPoints.Add(joint.JointType, primitive.transform);
             }
-            trackingPoints[joint.JointType].transform.localPosition = SkeletonPointToVector3(joint.Position);
+            trackingPoints[joint.JointType].localPosition = SkeletonPointToVector3(joint.Position);
+            trackingPoints[joint.JointType].rotation = BoneRotationToQuaternion(skeleton.BoneOrientations[jointType].AbsoluteRotation.Quaternion);
             Color trackingColor = Color.white;
             switch (joint.TrackingState)
             {
@@ -72,6 +73,11 @@ namespace KinectForBeatSaber
         private Vector3 SkeletonPointToVector3 (SkeletonPoint point)
         {
             return new Vector3(point.X * -1, point.Y, point.Z);
+        }
+
+        private Quaternion BoneRotationToQuaternion (Microsoft.Kinect.Vector4 rot)
+        {
+            return new Quaternion(rot.X, rot.Y, rot.Z, rot.W);
         }
     }
 }

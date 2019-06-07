@@ -25,7 +25,7 @@ namespace KinectForBeatSaber.Utils
             debug.applyImmediately = true;
             debug.SetValue += (v) => {
                 Plugin.config.ShowTrackingPoints = v;
-                foreach (GameObject obj in Plugin.parent.GetComponent<KinectToBS>().trackingPoints.Values)
+                foreach (Transform obj in Plugin.KinectInfo.trackingPoints.Values)
                     obj.GetComponent<Renderer>().enabled = v;
             };
 
@@ -69,7 +69,7 @@ namespace KinectForBeatSaber.Utils
                 list.GetTextForValue += (v) => Math.Round(v, 1).ToString();
                 list.SetValue += (v) =>
                 {
-                    Plugin.parent.GetComponent<KinectToBS>().StartCoroutine(DelayedUpdate());
+                    Plugin.KinectInfo.StartCoroutine(DelayedUpdate());
                     Plugin.config.Save();
                 };
             }
@@ -79,9 +79,9 @@ namespace KinectForBeatSaber.Utils
         private static IEnumerator DelayedUpdate()
         {
             yield return new WaitForEndOfFrame();
-            Plugin.parent.transform.position = Plugin.config.PositionOffset;
-            Plugin.parent.transform.rotation = Quaternion.Euler(Plugin.config.RotationOffset);
-            Plugin.parent.transform.localScale = Vector3.one * Plugin.config.Scale;
+            Plugin.KinectInfo.transform.position = Plugin.config.PositionOffset;
+            Plugin.KinectInfo.transform.rotation = Quaternion.Euler(Plugin.config.RotationOffset);
+            Plugin.KinectInfo.transform.localScale = Vector3.one * Plugin.config.Scale;
         }
     }
 }

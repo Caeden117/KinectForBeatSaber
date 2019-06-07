@@ -17,6 +17,7 @@ namespace KinectForBeatSaber.Utils
         public float Scale = 1;
         public float HeadRotationOffset = 0;
         public bool ShowTrackingPoints = true;
+        public bool CustomAvatarIntegration = true;
 
         public static Config Load()
         {

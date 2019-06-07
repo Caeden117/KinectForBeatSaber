@@ -5,17 +5,14 @@ using System;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using Microsoft.Kinect.Toolkit;
 using System.Linq;
-using System.Collections.Concurrent;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 using Microsoft.Kinect;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using KinectForBeatSaber.Utils;
+using Harmony;
 
 namespace KinectForBeatSaber
 {
@@ -28,11 +25,13 @@ namespace KinectForBeatSaber
         public static Plugin Instance;
         public static bool CompanionConnected = false;
         public static Config config;
-        public static GameObject parent;
+        public static KinectToBS KinectInfo;
 
         private AnonymousPipeClientStream client;
-        internal static List<Skeleton[]> skeletonsToProcess = new List<Skeleton[]>();
         private Task processingTask;
+
+        internal static List<Skeleton[]> skeletonsToProcess = new List<Skeleton[]>();
+        internal static HarmonyInstance harmonyInstance;
 
         public void OnApplicationStart()
         {
@@ -59,19 +58,20 @@ namespace KinectForBeatSaber
                         Log("Connections synced! We're ready for a good time!");
                         processingTask = new Task(HandleSkeletonData);
                         processingTask.Start();
+                        harmonyInstance = HarmonyInstance.Create("com.Caeden117.KinectForBeatSaber");
+                        harmonyInstance.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
                     }
                 }
             }
-            parent = new GameObject("Kinect for Beat Saber");
-            parent.AddComponent<KinectToBS>();
+            KinectInfo = new GameObject("Kinect for Beat Saber").AddComponent<KinectToBS>();
             if (PluginManager.GetPlugin("Custom Avatars") != null)
             {
                 Log("Custom Avatars detected! Adding Custom Avatars hook...");
-                //parent.AddComponent<AvatarsToKinect>();
+                //KinectInfo.gameObject.AddComponent<AvatarsToKinect>();
             }
-            parent.transform.position = config.PositionOffset;
-            parent.transform.rotation = Quaternion.Euler(config.RotationOffset);
-            parent.transform.localScale = Vector3.one * config.Scale;
+            KinectInfo.transform.position = config.PositionOffset;
+            KinectInfo.transform.rotation = Quaternion.Euler(config.RotationOffset);
+            KinectInfo.transform.localScale = Vector3.one * config.Scale;
             Process.GetCurrentProcess().Exited += Exit;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
