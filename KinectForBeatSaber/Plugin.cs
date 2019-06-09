@@ -58,20 +58,20 @@ namespace KinectForBeatSaber
                         Log("Connections synced! We're ready for a good time!");
                         processingTask = new Task(HandleSkeletonData);
                         processingTask.Start();
-                        harmonyInstance = HarmonyInstance.Create("com.Caeden117.KinectForBeatSaber");
-                        harmonyInstance.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+                        if (PluginManager.GetPlugin("Custom Avatars") != null)
+                        {
+                            Log("Custom Avatars detected! Adding Custom Avatars hook...");
+                            harmonyInstance = HarmonyInstance.Create("com.Caeden117.KinectForBeatSaber");
+                            harmonyInstance.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+                        }
                     }
                 }
             }
-            KinectInfo = new GameObject("Kinect for Beat Saber").AddComponent<KinectToBS>();
-            if (PluginManager.GetPlugin("Custom Avatars") != null)
-            {
-                Log("Custom Avatars detected! Adding Custom Avatars hook...");
-                //KinectInfo.gameObject.AddComponent<AvatarsToKinect>();
-            }
-            KinectInfo.transform.position = config.PositionOffset;
-            KinectInfo.transform.rotation = Quaternion.Euler(config.RotationOffset);
-            KinectInfo.transform.localScale = Vector3.one * config.Scale;
+            GameObject KinectGo = new GameObject("Kinect for Beat Saber");
+            KinectGo.transform.position = config.PositionOffset;
+            KinectGo.transform.rotation = Quaternion.Euler(config.RotationOffset);
+            KinectGo.transform.localScale = Vector3.one * config.Scale;
+            KinectInfo = KinectGo.AddComponent<KinectToBS>();
             Process.GetCurrentProcess().Exited += Exit;
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
