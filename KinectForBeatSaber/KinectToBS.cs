@@ -23,6 +23,7 @@ namespace KinectForBeatSaber
             if (Plugin.skeletonsToProcess.Count > 0)
             {
                 Skeleton[] skeletons = Plugin.skeletonsToProcess.First();
+                if (skeletons == null) return;
                 foreach (Skeleton skeleton in skeletons)
                     if (skeleton.TrackingState == SkeletonTrackingState.Tracked) RefreshTrackingPoints(skeleton);
                 if (Plugin.skeletonsToProcess.Last() != skeletons)
@@ -50,12 +51,22 @@ namespace KinectForBeatSaber
             if (!trackingPoints.ContainsKey(joint.JointType))
             {
                 GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                primitive.transform.localScale = Vector3.one * 0.1f;
+                primitive.transform.localScale = Vector3.one * 0.1f * Plugin.config.Scale;
                 primitive.transform.parent = transform;
                 trackingPoints.Add(joint.JointType, primitive.transform);
             }
             trackingPoints[joint.JointType].localPosition = SkeletonPointToVector3(joint.Position);
-            trackingPoints[joint.JointType].rotation = BoneRotationToQuaternion(skeleton.BoneOrientations[jointType].AbsoluteRotation.Quaternion);
+            Vector3 offset = Vector3.zero;
+            if (jointType == JointType.Head) {
+                Vector3 camForw = Camera.main.transform.forward;
+                Vector3 mirrored = Vector3.Reflect(camForw, new Vector3(0, 0, 1));
+                trackingPoints[joint.JointType].localRotation = Quaternion.LookRotation(mirrored, Camera.main.transform.up);
+            }
+            else
+            {
+                if (jointType == JointType.FootLeft || jointType == JointType.FootRight) offset = new Vector3(0, 180, 0);
+                trackingPoints[joint.JointType].localRotation = BoneRotationToQuaternion(skeleton.BoneOrientations[jointType].AbsoluteRotation.Quaternion) * Quaternion.Euler(offset);
+            }
             Color trackingColor = Color.white;
             switch (joint.TrackingState)
             {

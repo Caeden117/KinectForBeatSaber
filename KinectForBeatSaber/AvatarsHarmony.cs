@@ -47,107 +47,68 @@ namespace KinectForBeatSaber
         }
     }
 
-    [HarmonyPatch(typeof(AvatarSpawner))]
-    [HarmonyPatch("SpawnAvatar")]
-    class AvatarSpawnerPatch
+    [HarmonyPatch(typeof(IKManager))]
+    [HarmonyPatch("Start")]
+    class IKManagerPatch
     {
-        static bool Prefix(CustomAvatar.CustomAvatar customAvatar, IAvatarInput avatarInput, ref SpawnedAvatar __result)
+        static bool Prefix(ref IKManager __instance)
         {
-            if (customAvatar.GameObject == null) return true;
-            KinectToBS info = Plugin.KinectInfo;
-            VRIK ik = customAvatar.GameObject.GetComponentInChildren<VRIK>();
-            ik.solver.plantFeet = false;
-
-            //Spine
-            ik.solver.spine.headTarget = info.trackingPoints[JointType.Head];
-            ik.solver.spine.pelvisTarget = info.trackingPoints[JointType.HipCenter];
-            ik.solver.spine.pelvisPositionWeight = 1;
-            ik.solver.spine.pelvisRotationWeight = 1;
-            ik.solver.spine.rotateChestByHands = 0;
-            ik.solver.spine.chestGoal = info.trackingPoints[JointType.ShoulderCenter];
-            ik.solver.spine.chestGoalWeight = 1;
-            ik.solver.spine.positionWeight = 1;
-            ik.solver.spine.rotationWeight = 1;
-            ik.solver.spine.ResetOffsets();
-
-            //Left Side
-            ik.solver.leftArm.target = info.trackingPoints[JointType.WristLeft];
-            ik.solver.leftArm.bendGoal = info.trackingPoints[JointType.ElbowLeft];
-            ik.solver.leftArm.bendGoalWeight = 1;
-            ik.solver.leftArm.ResetOffsets();
-            ik.solver.leftLeg.target = info.trackingPoints[JointType.AnkleLeft];
-            ik.solver.leftLeg.bendGoal = info.trackingPoints[JointType.KneeLeft];
-            ik.solver.leftLeg.positionWeight = 1;
-            ik.solver.leftLeg.rotationWeight = 1;
-            ik.solver.leftLeg.bendGoalWeight = 1;
-            ik.solver.leftLeg.ResetOffsets();
-
-            //Right side
-            ik.solver.rightArm.target = info.trackingPoints[JointType.WristRight];
-            ik.solver.rightArm.bendGoal = info.trackingPoints[JointType.ElbowRight];
-            ik.solver.rightArm.bendGoalWeight = 1;
-            ik.solver.rightArm.ResetOffsets();
-            ik.solver.rightLeg.target = info.trackingPoints[JointType.AnkleRight];
-            ik.solver.rightLeg.bendGoal = info.trackingPoints[JointType.KneeRight];
-            ik.solver.rightLeg.positionWeight = 1;
-            ik.solver.rightLeg.rotationWeight = 1;
-            ik.solver.rightLeg.bendGoalWeight = 1;
-            ik.solver.rightLeg.ResetOffsets();
-
-            GameObject instantiate = UnityEngine.Object.Instantiate(customAvatar.GameObject);
-            AvatarBehaviour behaviour = instantiate.AddComponent<AvatarBehaviour>();
-            behaviour.Init(avatarInput);
-            instantiate.AddComponent<AvatarEventsPlayer>();
-            UnityEngine.Object.DontDestroyOnLoad(instantiate);
-            __result = new SpawnedAvatar(customAvatar, instantiate);
-            return false;
-        }
-    }
-
-    /*[HarmonyPatch(typeof(AvatarBehaviour))]
-    [HarmonyPatch("Init", MethodType.Normal)]
-    class AvatarsInitPatch
-    {
-        static void Postfix(ref AvatarBehaviour __instance, ref Transform ____head, ref Transform ____body,
-            ref Transform ____leftHand, ref Transform ____rightHand, ref Transform ____leftLeg, ref Transform ____rightLeg,
-            ref Transform ____pelvis)
-        {
-            if (!Plugin.config.CustomAvatarIntegration) return;
-            KinectToBS info = Plugin.KinectInfo;
-            VRIK ik = __instance.gameObject.GetComponentInChildren<VRIK>();
-            if (ik == null) ik = __instance.gameObject.GetComponent<VRIK>();
-            if (ik == null) ik = __instance.gameObject.GetComponentInParent<VRIK>();
-            if (ik == null) ik = __instance.gameObject.transform.parent?.GetComponentInChildren<VRIK>();
+            VRIK ik = __instance.gameObject.GetComponent<VRIK>();
             if (ik != null)
             {
-                //Im going to try this out, see how it goes.
-                ____head = info.trackingPoints[JointType.Head];
-                ____body = info.trackingPoints[JointType.ShoulderCenter];
-                ____leftHand = info.trackingPoints[JointType.HandLeft];
-                ____rightHand = info.trackingPoints[JointType.HandRight];
-                ____leftLeg = info.trackingPoints[JointType.FootLeft];
-                ____rightLeg = info.trackingPoints[JointType.FootRight];
-                ____pelvis = info.trackingPoints[JointType.HipCenter];
+                KinectToBS info = Plugin.KinectInfo;
+                ik.solver.plantFeet = false;
 
                 //Spine
                 ik.solver.spine.headTarget = info.trackingPoints[JointType.Head];
+                ik.solver.spine.headRotationOffset = Quaternion.Euler(0, Plugin.config.HeadRotationOffset, 0);
                 ik.solver.spine.pelvisTarget = info.trackingPoints[JointType.HipCenter];
+                ik.solver.spine.pelvisPositionWeight = 1;
+                ik.solver.spine.pelvisRotationWeight = 1;
+                ik.solver.spine.rotateChestByHands = 0;
+                //ik.solver.spine.chestGoal = info.trackingPoints[JointType.ShoulderCenter];
+                //ik.solver.spine.chestGoalWeight = 1;
+                //ik.solver.spine.positionWeight = 1;
+                //ik.solver.spine.rotationWeight = 1;
+                ik.solver.spine.ResetOffsets();
 
                 //Left Side
                 ik.solver.leftArm.target = info.trackingPoints[JointType.WristLeft];
                 ik.solver.leftArm.bendGoal = info.trackingPoints[JointType.ElbowLeft];
-                ik.solver.leftLeg.target = info.trackingPoints[JointType.AnkleLeft];
+                ik.solver.leftArm.bendGoalWeight = 1;
+                ik.solver.leftArm.ResetOffsets();
+                ik.solver.leftLeg.target = info.trackingPoints[JointType.FootLeft];
+                ik.solver.leftLeg.footRotationOffset = Quaternion.Euler(0, 180, 0);
                 ik.solver.leftLeg.bendGoal = info.trackingPoints[JointType.KneeLeft];
+                ik.solver.leftLeg.positionWeight = 1;
+                ik.solver.leftLeg.rotationWeight = 1;
+                ik.solver.leftLeg.bendGoalWeight = 1;
+                ik.solver.leftLeg.ResetOffsets();
 
                 //Right side
                 ik.solver.rightArm.target = info.trackingPoints[JointType.WristRight];
                 ik.solver.rightArm.bendGoal = info.trackingPoints[JointType.ElbowRight];
-                ik.solver.rightLeg.target = info.trackingPoints[JointType.AnkleRight];
+                ik.solver.rightArm.bendGoalWeight = 1;
+                ik.solver.rightArm.ResetOffsets();
+                ik.solver.rightLeg.target = info.trackingPoints[JointType.FootRight];
+                ik.solver.rightLeg.footRotationOffset = Quaternion.Euler(0, 180, 0);
                 ik.solver.rightLeg.bendGoal = info.trackingPoints[JointType.KneeRight];
-
-                //ik.solver.Initiate(ik.solver.GetRoot());
+                ik.solver.rightLeg.positionWeight = 1;
+                ik.solver.rightLeg.rotationWeight = 1;
+                ik.solver.rightLeg.bendGoalWeight = 1;
+                ik.solver.rightLeg.ResetOffsets();
             }
-            else Plugin.Log("VRIK is null.");
+            return false;
         }
-    }*/
+    }
+
+    [HarmonyPatch(typeof(IKManagerAdvanced))]
+    [HarmonyPatch("CheckFullBodyTracking")]
+    class CheckFullBodyTrackingPatch
+    {
+        static bool Prefix()
+        {
+            return false;
+        }
+    }
 }

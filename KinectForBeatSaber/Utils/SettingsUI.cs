@@ -34,7 +34,7 @@ namespace KinectForBeatSaber.Utils
             scale.GetValue = () => (float)Math.Round(Plugin.config.Scale, 1);
             scale.SetValue = (v) => Plugin.config.Scale = v;
             updatingLists.Add(scale);
-            ListViewController headRotation = General.AddList("Head Rotation Offset", Enumerable.Range(0, 45).Select(x => x * 1f).ToArray(), "Change the offset rotation of your head for your Custom Avatar.");
+            ListViewController headRotation = General.AddList("Head Rotation Offset", Enumerable.Range(0, 91).Select(x => x * 1f).ToArray(), "Change the offset rotation of your head for your Custom Avatar.");
             headRotation.applyImmediately = true;
             headRotation.GetValue = () => (float)Math.Round(Plugin.config.HeadRotationOffset, 1);
             headRotation.SetValue = (v) => Plugin.config.HeadRotationOffset = v;
