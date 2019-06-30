@@ -4,6 +4,7 @@ using Harmony;
 using CustomAvatar;
 using AvatarScriptPack;
 using System;
+using System.Collections;
 
 namespace KinectForBeatSaber
 {
@@ -77,8 +78,7 @@ namespace KinectForBeatSaber
                 ik.solver.leftArm.bendGoal = info.trackingPoints[JointType.ElbowLeft];
                 ik.solver.leftArm.bendGoalWeight = 1;
                 ik.solver.leftArm.ResetOffsets();
-                ik.solver.leftLeg.target = info.trackingPoints[JointType.FootLeft];
-                ik.solver.leftLeg.footRotationOffset = Quaternion.Euler(0, 180, 0);
+                ik.solver.leftLeg.target = info.trackingPoints[JointType.AnkleLeft];
                 ik.solver.leftLeg.bendGoal = info.trackingPoints[JointType.KneeLeft];
                 ik.solver.leftLeg.positionWeight = 1;
                 ik.solver.leftLeg.rotationWeight = 1;
@@ -90,16 +90,24 @@ namespace KinectForBeatSaber
                 ik.solver.rightArm.bendGoal = info.trackingPoints[JointType.ElbowRight];
                 ik.solver.rightArm.bendGoalWeight = 1;
                 ik.solver.rightArm.ResetOffsets();
-                ik.solver.rightLeg.target = info.trackingPoints[JointType.FootRight];
-                ik.solver.rightLeg.footRotationOffset = Quaternion.Euler(0, 180, 0);
+                ik.solver.rightLeg.target = info.trackingPoints[JointType.AnkleRight];
                 ik.solver.rightLeg.bendGoal = info.trackingPoints[JointType.KneeRight];
                 ik.solver.rightLeg.positionWeight = 1;
                 ik.solver.rightLeg.rotationWeight = 1;
                 ik.solver.rightLeg.bendGoalWeight = 1;
                 ik.solver.rightLeg.ResetOffsets();
             }
+            //__instance.StartCoroutine(KindaUpdateButNotReally(ik));
             return false;
         }
+
+        /*private static IEnumerator KindaUpdateButNotReally(VRIK ik)
+        {
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+        }*/
     }
 
     [HarmonyPatch(typeof(IKManagerAdvanced))]
