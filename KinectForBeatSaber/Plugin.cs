@@ -12,11 +12,10 @@ using Microsoft.Kinect;
 using System.Threading.Tasks;
 using UnityEngine;
 using KinectForBeatSaber.Utils;
-using Harmony;
 
 namespace KinectForBeatSaber
 {
-    #pragma warning disable CS0618 //Fuck off DaNike
+    #pragma warning disable CS0618 //BSIPA 4 can still load IPlugins. If it aint broke, don't fix it.
     public class Plugin : IPlugin
     {
         public string Name => "Kinect for Beat Saber (Xbox 360)";
@@ -31,7 +30,6 @@ namespace KinectForBeatSaber
         private Task processingTask;
 
         internal static List<Skeleton[]> skeletonsToProcess = new List<Skeleton[]>();
-        internal static HarmonyInstance harmonyInstance;
 
         public void OnApplicationStart()
         {
@@ -49,21 +47,19 @@ namespace KinectForBeatSaber
                     using (StreamReader sr = new StreamReader(client))
                     {
                         Log("Attempting to establish sync with companion application...");
-                        string temp;
+                        string temp = "";
                         do
                         {
-                            temp = sr.ReadLine();
+                            try
+                            {
+                                temp = sr.ReadLine();
+                            }
+                            catch { }
                         }
                         while (!temp.StartsWith("SYNC"));
                         Log("Connections synced! We're ready for a good time!");
                         processingTask = new Task(HandleSkeletonData);
                         processingTask.Start();
-                        if (PluginManager.GetPlugin("Custom Avatars") != null)
-                        {
-                            Log("Custom Avatars detected! Adding Custom Avatars hook...");
-                            harmonyInstance = HarmonyInstance.Create("com.Caeden117.KinectForBeatSaber");
-                            harmonyInstance.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
-                        }
                     }
                 }
             }
@@ -91,6 +87,7 @@ namespace KinectForBeatSaber
                         {
                             Log("Connection died.");
                             CompanionConnected = false;
+                            break;
                         }
                         List<byte> bytes = new List<byte>();
                         foreach(string part in temp.Split(',')) bytes.Add(Convert.ToByte(part));
@@ -122,10 +119,10 @@ namespace KinectForBeatSaber
 
         private void SceneManager_sceneLoaded(Scene arg0, LoadSceneMode arg1)
         {
+            if (!skeletonsToProcess.Any()) return;
             Skeleton[] last = skeletonsToProcess.Last();
             skeletonsToProcess.Clear();
-            skeletonsToProcess.Add(last);
-            if (arg0.name == "MenuCore") SettingsUI.Create();
+            if (last != null) skeletonsToProcess.Add(last);
         }
 
         public void OnApplicationQuit()

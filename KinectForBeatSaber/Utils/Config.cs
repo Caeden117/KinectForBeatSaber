@@ -12,8 +12,8 @@ namespace KinectForBeatSaber.Utils
     public class Config
     {
         internal static BS_Utils.Utilities.Config file = new BS_Utils.Utilities.Config("KinectForBeatSaber");
-        public Vector3 PositionOffset = new Vector3(0, 0, 0);
-        public Vector3 RotationOffset = new Vector3(0, 0, 0);
+        public Vector3 PositionOffset = new Vector3(0.1f, 1.2f, 0.1f);
+        public Vector3 RotationOffset = new Vector3(0, 340, 0);
         public float Scale = 1;
         public float HeadRotationOffset = 0;
         public bool ShowTrackingPoints = true;

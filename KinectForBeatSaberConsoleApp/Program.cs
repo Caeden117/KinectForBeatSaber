@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Toolkit;
 using System.Diagnostics;
@@ -19,6 +15,7 @@ namespace KinectForBeatSaberApp
         private static AnonymousPipeServerStream serverStream;
         private static KinectSensorChooser chooser;
         private static StreamWriter sw;
+        private static Process beatSaber;
 
         static void Main(string[] args)
         {
@@ -33,10 +30,12 @@ namespace KinectForBeatSaberApp
             Process.GetCurrentProcess().Exited += Exit;
             Console.WriteLine("Kinect active. Launching Beat Saber...");
 
-            serverStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
-            serverStream.ReadMode = PipeTransmissionMode.Byte;
+            serverStream = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable)
+            {
+                ReadMode = PipeTransmissionMode.Byte
+            };
 
-            Process beatSaber = new Process();
+            beatSaber = new Process();
             beatSaber.StartInfo.FileName = "Beat Saber.exe"; //This NEEDS to be placed in the root Beat Saber folder
             beatSaber.StartInfo.Arguments = $"{string.Join(" ", args)} KinectClientHandle={serverStream.GetClientHandleAsString()}";
             beatSaber.StartInfo.UseShellExecute = false;
@@ -47,8 +46,10 @@ namespace KinectForBeatSaberApp
             try
             {
                 Console.WriteLine("Attempting to establish connection...");
-                sw = new StreamWriter(serverStream);
-                sw.AutoFlush = true;
+                sw = new StreamWriter(serverStream)
+                {
+                    AutoFlush = true
+                };
                 sw.WriteLine("SYNC");
                 serverStream.WaitForPipeDrain();
                 Console.WriteLine("Connection established! We are good to go!");
@@ -62,16 +63,18 @@ namespace KinectForBeatSaberApp
             beatSaber.WaitForExit();
             beatSaber.Close();
             Console.WriteLine("Beat Saber terminated. Terminating self...");
+            //Console.ReadLine();
             Process.GetCurrentProcess().Close();
         }
 
         private static void Exit(object sender, EventArgs e)
         {
             sw.WriteLine("TERMINATED");
-            sw.Close();
-            serverStream.Dispose();
+            sw?.Close();
+            serverStream?.Dispose();
             chooser.KinectChanged -= KinectUpdate;
-            chooser.Stop();
+            chooser?.Stop();
+            beatSaber?.Dispose();
             if (sensor != null)
             {
                 sensor.SkeletonFrameReady -= SkeletonFrameReady;
@@ -101,6 +104,7 @@ namespace KinectForBeatSaberApp
         {
             try
             {
+                if (!serverStream.IsConnected) return;
                 Skeleton[] array = new Skeleton[0];
                 using (SkeletonFrame frame = e.OpenSkeletonFrame())
                 {
@@ -113,13 +117,13 @@ namespace KinectForBeatSaberApp
                         sw.AutoFlush = true;
                         sw.WriteLine(string.Join(",", bytes));
                     }
-                    catch { Console.WriteLine("Beat Saber terminated."); }
+                    catch (Exception ex) { Console.WriteLine(ex.Message); }
                 }
             }
             catch { }
         }
 
-        public static byte[] ObjectToByteArray(Object obj)
+        public static byte[] ObjectToByteArray(object obj)
         {
             BinaryFormatter bf = new BinaryFormatter();
             using (var ms = new MemoryStream())
